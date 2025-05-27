@@ -51,6 +51,26 @@ Examples:
   vic-catparser.py input.json 2 -o Category2.json    # Save Category 2 items to a file
 ```
 
+## Utility Tools ##
+
+The project includes several utility tools in the `utils` directory:
+
+### JSON Structure Analyzer ###
+
+Located at `utils/json_structure_analyzer.py`, this tool helps analyze the structure of any JSON file. It is useful for understanding the schema of Project VIC files or verifying the structure of output files.
+
+Usage:
+```
+python3 utils/json_structure_analyzer.py input.json [--max-sample 50]
+```
+
+### Example Files ###
+
+- `utils/example-VIC-data.json`: A minimal example of a Project VIC JSON file and structure
+- `utils/example-VIC-structure.txt`: Basic structure analysis of a Project VIC file
+
+These examples can help with understanding a basic Project VIC file format and with test the tools.
+
 ## Support ##
 
 Please use the project Issues List to report any bugs or request enhancements.
