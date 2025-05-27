@@ -13,8 +13,21 @@ class VICParser:
     
     def __init__(self, file_path: Path):
         self.file_path = file_path
+        self.context = None
         if not self.file_path.exists():
             raise FileNotFoundError(f"File not found: {file_path}")
+
+    def get_context(self) -> str:
+        """Get the @odata.context from the input file."""
+        if self.context is None:
+            with open(self.file_path, 'rb') as f:
+                # Get just the context field
+                parser = ijson.parse(f)
+                for prefix, event, value in parser:
+                    if prefix == '@odata.context':
+                        self.context = value
+                        break
+        return self.context
 
     def count_items(self) -> int:
         """Count the total number of items in the JSON array."""
@@ -53,13 +66,27 @@ class OutputFormatter:
             output.append("Exif Data:")
             for exif in item['Exifs']:
                 output.append(f"  - {exif.get('PropertyName')}: {exif.get('PropertyValue')}")
-        output.append("----------------------------------------\n")
+        output.append("\n")
         return '\n'.join(output)
 
     @staticmethod
-    def format_json(item: Dict[str, Any]) -> str:
-        """Format a single item as a JSON string."""
-        return json.dumps(item, separators=(',', ':'))
+    def format_json(items: List[Dict[str, Any]], context: str) -> str:
+        """Format items as a JSON string with @odata.context."""
+        vic_data = {
+            "@odata.context": context,
+            "value": items
+        }
+        return json.dumps(vic_data, separators=(',', ':'))
+
+    @staticmethod
+    def write_json_file(items: List[Dict[str, Any]], context: str, file_path: str) -> None:
+        """Write items to a file in VIC JSON format with @odata.context."""
+        vic_data = {
+            "@odata.context": context,
+            "value": items
+        }
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(vic_data, f, separators=(',', ':'))
 
 def main():
     parser = argparse.ArgumentParser(
@@ -86,6 +113,9 @@ Examples:
         vic_parser = VICParser(Path(args.json_file))
         formatter = OutputFormatter()
         
+        # Get the context from the input file
+        context = vic_parser.get_context()
+        
         # Count items and prepare progress bar
         print("Counting total items in all categories...")
         total_items = vic_parser.count_items()
@@ -95,26 +125,26 @@ Examples:
         matches = []
         with tqdm(total=total_items, unit='items') as pbar:
             for item in vic_parser.stream_items(args.category):
-                if args.output:
+                if args.output or args.output_format == 'json':
                     matches.append(item)
                 else:
-                    # Print immediately for console output
-                    if args.output_format == 'readable':
-                        print(formatter.format_readable(item))
-                    else:  # json format
-                        print(formatter.format_json(item))
+                    # Print immediately for readable format
+                    print(formatter.format_readable(item))
                 pbar.update(1)
 
-        # Handle file output if specified
+        # Handle output
         if args.output:
             print(f"\nWriting results to {args.output}...")
-            with open(args.output, 'w', encoding='utf-8') as f:
-                if args.output_format == 'readable':
+            if args.output_format == 'readable':
+                with open(args.output, 'w', encoding='utf-8') as f:
                     for item in matches:
                         f.write(formatter.format_readable(item))
-                else:  # json format
-                    json.dump(matches, f, separators=(',', ':'))
+            else:  # json format
+                formatter.write_json_file(matches, context, args.output)
             print(f"Results have been saved to {args.output}")
+        elif args.output_format == 'json':
+            # Print JSON to console
+            print(formatter.format_json(matches, context))
         
     except ijson.JSONError as e:
         print(f"Error: Invalid JSON file: {e}")
