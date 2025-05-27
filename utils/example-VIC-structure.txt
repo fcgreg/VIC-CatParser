@@ -1,0 +1,22 @@
+
+Structure analysis of Project VIC JSON file:
+
+@odata.context (dict key):
+  Type: str, Sample: http://github.com/VICSDATAMODEL/ProjectVic/DataModels/2.0.xml/Default/$metadata#Media
+value (dict key):
+  List with 186419 items, first item type: dict
+    MediaID (dict key):
+      Type: int, Sample: 1
+    Category (dict key):
+      Type: int, Sample: 0
+    MD5 (dict key):
+      Type: str, Sample: ADEBF3FA3C9BE7F73825E1CB9E2DEA09
+    SHA1 (dict key):
+      Type: str, Sample: 2B037F69C566DFDB3A5A79E5360D085959BDDE4C
+    MediaSize (dict key):
+      Type: int, Sample: 2835
+    DateUpdated (dict key):
+      Type: str, Sample: 2023-06-07T02:31:49.8300Z
+    IsPrecategorized (dict key):
+      Type: str, Sample: false
+
