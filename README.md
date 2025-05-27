@@ -18,7 +18,7 @@ This project allows the extraction of items matching a specific Category from a 
 * Having a working **pip3** installation is strongly recommended, and is required for automatic processing of the *requirements.txt* file.
 * Ensure the required packages are installed from the *requirements.txt* file. With pip3 installed, this can be done as follows:
     ```
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
     ```
 * Your source Project VIC file must be uncompressed/unzipped prior to processing.
 * The generated Project VIC Category file may be quite large depending on the source file and chosen output Category. Ensure you have enough disk space in your output drive/location.
@@ -31,8 +31,6 @@ The script(s) in this project are standalone and do not require any special inst
 
 ```
 usage: vic-catparser.py [-h] [-o OUTPUT] [-f {json,readable}] json_file category
-
-Project VIC JSON Parser - Process and filter VIC JSON data files
 
 positional arguments:
   json_file             Path to the VIC JSON file
