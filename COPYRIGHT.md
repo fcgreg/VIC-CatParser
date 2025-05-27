@@ -2,9 +2,7 @@
 
 The code in this project is Copyright 2025 as follows:
 
-> Greg Tassone, DA Investigator - 
-> Nevada County District Attorney's Office - 
-> High Tech Crimes Task Force
+> Greg Tassone, Forensic Examiner/Investigator: gtdev@tassone.net
 
 ## LICENSE ##
 
