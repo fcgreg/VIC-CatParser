@@ -30,9 +30,8 @@ The script(s) in this project are standalone and do not require any special inst
 ## Usage ##
 
 ```
-usage: vic-catparser.py [-h] [-o OUTPUTFILE] [-f {json,readable,hashonly}] json_file category
-
-Project VIC JSON Parser - Process and filter VIC JSON data files
+usage: vic-catparser.py [-h] [-o OUTPUTFILE] [-f {json,readable,hashonly}] [--hash {md5,sha1,photodna}]
+                        json_file category
 
 positional arguments:
   json_file             Path to the VIC JSON file
@@ -43,13 +42,18 @@ options:
   -o OUTPUTFILE, --output OUTPUTFILE
                         Optional output file for results
   -f {json,readable,hashonly}, --format {json,readable,hashonly}
-                        Output format: 'json', 'readable', or 'hashonly' (default: json)
+                        Output format: 'json', 'readable', or 'hashonly' (default: json). The 'hashonly' format option
+                        requires the --hash option to be specified, and outputs the chosen hashes one per line.
+  --hash {md5,sha1,photodna}
+                        Hash type to output when using the 'hashonly' format option (default: md5). Otherwise this
+                        option is ignored
 
 Examples:
   vic-catparser.py input.json 1                      # Find Category 1 items, output as JSON
   vic-catparser.py input.json 0 -f readable          # Find Category 0 items in readable format
   vic-catparser.py input.json 2 -o Category2.json    # Save Category 2 items to a file
-  vic-catparser.py input.json 1 -f hashonly          # Output only MD5 hashes for Category 1
+  vic-catparser.py input.json 1 -f hashonly --hash md5     # Output only MD5 hashes
+  vic-catparser.py input.json 1 -f hashonly --hash sha1    # Output only SHA1 hashes
 ```
 
 ### Output Formats ###
@@ -58,7 +62,10 @@ The script supports three output formats:
 
 1. **json** (default): Outputs the full JSON data in Project VIC format, including @odata.context
 2. **readable**: Human-readable format showing all fields with clear labels
-3. **hashonly**: Outputs only the MD5 hashes, one per line (useful for creating hash lists)
+3. **hashonly**: Outputs only the specified hash type (MD5, SHA1, or PhotoDNA), one per line. Use the `--hash` option to specify which hash type you want:
+   - `--hash md5` (default): Output MD5 hashes
+   - `--hash sha1`: Output SHA1 hashes
+   - `--hash photodna`: Output PhotoDNA hashes
 
 ## Utility Tools ##
 

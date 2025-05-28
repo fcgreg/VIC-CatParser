@@ -70,9 +70,24 @@ class OutputFormatter:
         return '\n'.join(output)
 
     @staticmethod
-    def format_hashonly(item: Dict[str, Any]) -> str:
-        """Format a single item to output only its MD5 hash."""
-        return f"{item.get('MD5', '')}\n"
+    def format_hashonly(item: Dict[str, Any], hash_type: str) -> Optional[str]:
+        """Format a single item to output only the specified hash type.
+        
+        Args:
+            item: The item containing hash values
+            hash_type: Type of hash to output ('md5', 'sha1', or 'photodna')
+            
+        Returns:
+            A string containing the hash value and newline if the hash exists,
+            or None if the hash value is empty.
+        """
+        hash_map = {
+            'md5': 'MD5',
+            'sha1': 'SHA1',
+            'photodna': 'PhotoDNA'
+        }
+        hash_value = item.get(hash_map[hash_type], '')
+        return f"{hash_value}\n" if hash_value else None
 
     @staticmethod
     def format_json(items: List[Dict[str, Any]], context: str) -> str:
@@ -102,7 +117,8 @@ Examples:
   %(prog)s input.json 1                      # Find Category 1 items, output as JSON
   %(prog)s input.json 0 -f readable          # Find Category 0 items in readable format
   %(prog)s input.json 2 -o Category2.json    # Save Category 2 items to a file
-  %(prog)s input.json 1 -f hashonly          # Output only MD5 hashes for Category 1
+  %(prog)s input.json 1 -f hashonly --hash md5     # Output only MD5 hashes
+  %(prog)s input.json 1 -f hashonly --hash sha1    # Output only SHA1 hashes
         """
     )
     parser.add_argument("json_file", help="Path to the VIC JSON file")
@@ -110,7 +126,9 @@ Examples:
     parser.add_argument("-o", "--output", metavar="OUTPUTFILE", help="Optional output file for results")
     parser.add_argument("-f", "--format", choices=['json', 'readable', 'hashonly'], default='json',
                       dest='output_format',
-                      help="Output format: 'json', 'readable', or 'hashonly' (default: json)")
+                      help="Output format: 'json', 'readable', or 'hashonly' (default: json). The 'hashonly' format option requires the --hash option to be specified, and outputs the chosen hashes one per line.")
+    parser.add_argument("--hash", choices=['md5', 'sha1', 'photodna'], default='md5',
+                      help="Hash type to output when using the 'hashonly' format option (default: md5). Otherwise this option is ignored")
     
     args = parser.parse_args()
     
@@ -138,7 +156,9 @@ Examples:
                     if args.output_format == 'readable':
                         print(formatter.format_readable(item))
                     elif args.output_format == 'hashonly':
-                        print(formatter.format_hashonly(item), end='')
+                        hash_line = formatter.format_hashonly(item, args.hash)
+                        if hash_line:
+                            print(hash_line, end='')
                 pbar.update(1)
 
         # Handle output
@@ -151,7 +171,9 @@ Examples:
             elif args.output_format == 'hashonly':
                 with open(args.output, 'w', encoding='utf-8') as f:
                     for item in matches:
-                        f.write(formatter.format_hashonly(item))
+                        hash_line = formatter.format_hashonly(item, args.hash)
+                        if hash_line:
+                            f.write(hash_line)
             else:  # json format
                 formatter.write_json_file(matches, context, args.output)
             print(f"Results have been saved to {args.output}")
