@@ -171,8 +171,8 @@ Examples:
 
         print(f"\nFound {matches_found_count} matches for Category {args.category}")
 
-        # Handle output processing if an output file is specified
-        if args.output:
+        # Handle output processing if an output file is specified and we have matches to process
+        if args.output and matches:
             print(f"\nWriting results to {args.output}...")
             if args.output_format == 'readable':
                 with open(args.output, 'w', encoding='utf-8') as f:
