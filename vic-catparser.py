@@ -146,22 +146,32 @@ Examples:
         print(f"\nSearching {total_items} items for desired Category: {args.category}")
 
         # Process items
-        matches = []
+        matches = [] # List of matches found for later output processing
+        matches_found_count = 0 # Total count of matches found
+        hash_matches_processed_count = 0 # Total count of hash matches processed. If hashes are needed but these are not equal, it means some of the hash fields were empty. Print a message if this is the case.
         with tqdm(total=total_items, unit='items') as pbar:
-            for item in vic_parser.stream_items(args.category):
-                if args.output or args.output_format == 'json':
-                    matches.append(item)
-                else:
-                    # Print immediately for readable or hashonly format
-                    if args.output_format == 'readable':
-                        print(formatter.format_readable(item))
-                    elif args.output_format == 'hashonly':
-                        hash_line = formatter.format_hashonly(item, args.hash)
-                        if hash_line:
-                            print(hash_line, end='')
+            for item in vic_parser.stream_items():
+                # Check if the item is valid and if the Category matches the desired category
+                if (isinstance(item, dict) and item.get('Category') == args.category):
+                    # We found a match. Update the matches count.
+                    matches_found_count += 1
+                    # Add the match to the list of matches for later output processing, unless we dumping to the console output (which we do right away)
+                    if args.output or args.output_format == 'json':
+                        matches.append(item)
+                    else:
+                        # Print immediately for readable or hashonly format
+                        if args.output_format == 'readable':
+                            print(formatter.format_readable(item))
+                        elif args.output_format == 'hashonly':
+                            hash_line = formatter.format_hashonly(item, args.hash)
+                            if hash_line:
+                                print(hash_line, end='')
+                # Done processing this item. Update the progress bar.
                 pbar.update(1)
 
-        # Handle output
+        print(f"\nFound {matches_found_count} matches for Category {args.category}")
+
+        # Handle output processing if an output file is specified
         if args.output:
             print(f"\nWriting results to {args.output}...")
             if args.output_format == 'readable':
@@ -173,6 +183,8 @@ Examples:
                     for item in matches:
                         hash_line = formatter.format_hashonly(item, args.hash)
                         if hash_line:
+                            # We found a non-empty hash. Update the hash matches processed count and print the output.
+                            hash_matches_processed_count += 1
                             f.write(hash_line)
             else:  # json format
                 formatter.write_json_file(matches, context, args.output)
@@ -180,6 +192,10 @@ Examples:
         elif args.output_format == 'json':
             # Print JSON to console
             print(formatter.format_json(matches, context))
+        
+        # If we are in hashonly mode, print a warning if the hash matches processed count is less than the matches found count. This means some of the hash fields were empty.
+        if args.output_format == 'hashonly' and (hash_matches_processed_count < matches_found_count):
+            print(f"Warning: {matches_found_count - hash_matches_processed_count} {args.hash} hashes were empty and not included in the output.")
         
     except ijson.JSONError as e:
         print(f"Error: Invalid JSON file: {e}")
