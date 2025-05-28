@@ -70,6 +70,11 @@ class OutputFormatter:
         return '\n'.join(output)
 
     @staticmethod
+    def format_hashonly(item: Dict[str, Any]) -> str:
+        """Format a single item to output only its MD5 hash."""
+        return f"{item.get('MD5', '')}\n"
+
+    @staticmethod
     def format_json(items: List[Dict[str, Any]], context: str) -> str:
         """Format items as a JSON string with @odata.context."""
         vic_data = {
@@ -97,14 +102,15 @@ Examples:
   %(prog)s input.json 1                      # Find Category 1 items, output as JSON
   %(prog)s input.json 0 -f readable          # Find Category 0 items in readable format
   %(prog)s input.json 2 -o Category2.json    # Save Category 2 items to a file
+  %(prog)s input.json 1 -f hashonly          # Output only MD5 hashes for Category 1
         """
     )
     parser.add_argument("json_file", help="Path to the VIC JSON file")
     parser.add_argument("category", type=int, help="Category number to search for")
-    parser.add_argument("-o", "--output", help="Optional output file for results")
-    parser.add_argument("-f", "--format", choices=['json', 'readable'], default='json',
+    parser.add_argument("-o", "--output", metavar="OUTPUTFILE", help="Optional output file for results")
+    parser.add_argument("-f", "--format", choices=['json', 'readable', 'hashonly'], default='json',
                       dest='output_format',
-                      help="Output format: 'json' or 'readable' (default: json)")
+                      help="Output format: 'json', 'readable', or 'hashonly' (default: json)")
     
     args = parser.parse_args()
     
@@ -128,8 +134,11 @@ Examples:
                 if args.output or args.output_format == 'json':
                     matches.append(item)
                 else:
-                    # Print immediately for readable format
-                    print(formatter.format_readable(item))
+                    # Print immediately for readable or hashonly format
+                    if args.output_format == 'readable':
+                        print(formatter.format_readable(item))
+                    elif args.output_format == 'hashonly':
+                        print(formatter.format_hashonly(item), end='')
                 pbar.update(1)
 
         # Handle output
@@ -139,6 +148,10 @@ Examples:
                 with open(args.output, 'w', encoding='utf-8') as f:
                     for item in matches:
                         f.write(formatter.format_readable(item))
+            elif args.output_format == 'hashonly':
+                with open(args.output, 'w', encoding='utf-8') as f:
+                    for item in matches:
+                        f.write(formatter.format_hashonly(item))
             else:  # json format
                 formatter.write_json_file(matches, context, args.output)
             print(f"Results have been saved to {args.output}")
