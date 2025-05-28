@@ -165,6 +165,8 @@ Examples:
                         elif args.output_format == 'hashonly':
                             hash_line = formatter.format_hashonly(item, args.hash)
                             if hash_line:
+                                # We found a non-empty hash. Update the hash matches processed count and print the output.
+                                hash_matches_processed_count += 1
                                 print(hash_line, end='')
                 # Done processing this item. Update the progress bar.
                 pbar.update(1)
@@ -183,7 +185,7 @@ Examples:
                     for item in matches:
                         hash_line = formatter.format_hashonly(item, args.hash)
                         if hash_line:
-                            # We found a non-empty hash. Update the hash matches processed count and print the output.
+                            # We found a non-empty hash. Update the hash matches processed count and send the output.
                             hash_matches_processed_count += 1
                             f.write(hash_line)
             else:  # json format
