@@ -114,11 +114,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s input.json 1                      # Find Category 1 items, output as JSON
-  %(prog)s input.json 0 -f readable          # Find Category 0 items in readable format
-  %(prog)s input.json 2 -o Category2.json    # Save Category 2 items to a file
-  %(prog)s input.json 1 -f hashonly --hash md5     # Output only MD5 hashes
-  %(prog)s input.json 1 -f hashonly --hash sha1    # Output only SHA1 hashes
+  %(prog)s input.json 1                           # Find Category 1 items, output as JSON
+  %(prog)s input.json 0 -f readable               # Find Category 0 items in readable format
+  %(prog)s input.json 2 -o Category2.json         # Save Category 2 items to a file
+  %(prog)s input.json 1 -f hashonly --hash md5    # Output only MD5 hashes
+  %(prog)s input.json 1 -f hashonly --hash sha1   # Output only SHA1 hashes
         """
     )
     parser.add_argument("json_file", help="Path to the VIC JSON file")

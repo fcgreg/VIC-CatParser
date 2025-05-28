@@ -30,8 +30,7 @@ The script(s) in this project are standalone and do not require any special inst
 ## Usage ##
 
 ```
-usage: vic-catparser.py [-h] [-o OUTPUTFILE] [-f {json,readable,hashonly}] [--hash {md5,sha1,photodna}]
-                        json_file category
+usage: vic-catparser.py [-h] [-o OUTPUTFILE] [-f {json,readable,hashonly}] [--hash {md5,sha1,photodna}] json_file category
 
 positional arguments:
   json_file             Path to the VIC JSON file
@@ -42,18 +41,16 @@ options:
   -o OUTPUTFILE, --output OUTPUTFILE
                         Optional output file for results
   -f {json,readable,hashonly}, --format {json,readable,hashonly}
-                        Output format: 'json', 'readable', or 'hashonly' (default: json). The 'hashonly' format option
-                        requires the --hash option to be specified, and outputs the chosen hashes one per line.
+                        Output format: 'json', 'readable', or 'hashonly' (default: json). The 'hashonly' format option requires the --hash option to be specified, and outputs the chosen hashes one per line.
   --hash {md5,sha1,photodna}
-                        Hash type to output when using the 'hashonly' format option (default: md5). Otherwise this
-                        option is ignored
+                        Hash type to output when using the 'hashonly' format option (default: md5). Otherwise this option is ignored
 
 Examples:
-  vic-catparser.py input.json 1                      # Find Category 1 items, output as JSON
-  vic-catparser.py input.json 0 -f readable          # Find Category 0 items in readable format
-  vic-catparser.py input.json 2 -o Category2.json    # Save Category 2 items to a file
-  vic-catparser.py input.json 1 -f hashonly --hash md5     # Output only MD5 hashes
-  vic-catparser.py input.json 1 -f hashonly --hash sha1    # Output only SHA1 hashes
+  vic-catparser.py input.json 1                           # Find Category 1 items, output as JSON
+  vic-catparser.py input.json 0 -f readable               # Find Category 0 items in readable format
+  vic-catparser.py input.json 2 -o Category2.json         # Save Category 2 items to a file
+  vic-catparser.py input.json 1 -f hashonly --hash md5    # Output only MD5 hashes
+  vic-catparser.py input.json 1 -f hashonly --hash sha1   # Output only SHA1 hashes
 ```
 
 ### Output Formats ###
