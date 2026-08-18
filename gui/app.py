@@ -1,7 +1,8 @@
 """VIC-CatParser GUI application."""
 
-import os
 import queue
+import subprocess
+import sys
 import threading
 import time
 from pathlib import Path
@@ -17,6 +18,7 @@ MAX_PREVIEW_MATCHES = 500
 PROGRESS_UPDATE_INTERVAL_S = 0.1
 QUEUE_EVENTS_PER_TICK = 50
 QUEUE_POLL_INTERVAL_MS = 50
+DEFAULT_OUTPUT_FILENAME = "VIC-CatParser_output.txt"
 
 
 class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
@@ -235,11 +237,7 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
     def _suggest_output_path(self, input_path: str):
         if self.output_entry.get().strip():
             return
-        input_file = Path(input_path)
-        category = self.category_var.get().strip() or "0"
-        fmt = self.format_var.get()
-        ext = ".json" if fmt == "json" else ".txt"
-        suggested = input_file.parent / f"Category{category}{ext}"
+        suggested = Path(input_path).parent / DEFAULT_OUTPUT_FILENAME
         self.output_entry.set(str(suggested))
 
     def _set_processing_state(self, processing: bool):
@@ -274,6 +272,14 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
             output_path_str = self.output_entry.get().strip()
 
         output_file = Path(output_path_str) if output_path_str else None
+
+        if output_file is not None and output_file.exists():
+            confirmed = messagebox.askyesno(
+                "Confirm output file",
+                "Confirm you want to output over an existing file?",
+            )
+            if not confirmed:
+                return
 
         self._cancel_event.clear()
         self._clear_preview()
@@ -449,8 +455,15 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
         messagebox.showerror("Processing error", message)
 
     def _open_output_folder(self):
-        if self._last_output_path and self._last_output_path.exists():
-            os.startfile(self._last_output_path.parent)
+        if not self._last_output_path or not self._last_output_path.exists():
+            return
+        folder = str(self._last_output_path.parent)
+        if sys.platform == "win32":
+            subprocess.run(["explorer", folder], check=False)
+        elif sys.platform == "darwin":
+            subprocess.run(["open", folder], check=False)
+        else:
+            subprocess.run(["xdg-open", folder], check=False)
 
 
 def main():
