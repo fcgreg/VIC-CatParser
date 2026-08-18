@@ -1,2 +1,4 @@
 ijson>=3.2.3
-tqdm>=4.65.0 
+tqdm>=4.65.0
+customtkinter>=5.2.0
+tkinterdnd2>=0.3.0
