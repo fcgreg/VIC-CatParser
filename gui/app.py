@@ -252,7 +252,7 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
             self.preview_tree.delete(item)
         self._preview_count = 0
         self._total_matches = 0
-        self.summary_label.configure(text="Match preview")
+        self.summary_label.configure(text="Matches (preview)")
 
     def _start_processing(self):
         input_path = self.input_entry.get().strip()
