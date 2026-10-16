@@ -48,16 +48,16 @@ options:
   -o OUTPUTFILE, --output OUTPUTFILE
                         Optional output file for results
   -f {json,readable,hashonly}, --format {json,readable,hashonly}
-                        Output format: 'json', 'readable', or 'hashonly' (default: json). The 'hashonly' format option requires the --hash option to be specified, and outputs the chosen hashes one per line.
+                        Output format: 'json', 'readable', or 'hashonly' (default: hashonly). The 'hashonly' format outputs the chosen hashes one per line (see --hash).
   --hash {md5,sha1,photodna}
                         Hash type to output when using the 'hashonly' format option (default: md5). Otherwise this option is ignored
 
 Examples:
-  vic-catparser.py input.json 1                           # Find Category 1 items, output as JSON
+  vic-catparser.py input.json 1                           # Find Category 1 items, output MD5 hashes (default)
   vic-catparser.py input.json 0 -f readable               # Find Category 0 items in readable format
-  vic-catparser.py input.json 2 -o Category2.json         # Save Category 2 items to a file
-  vic-catparser.py input.json 1 -f hashonly --hash md5    # Output only MD5 hashes
-  vic-catparser.py input.json 1 -f hashonly --hash sha1   # Output only SHA1 hashes
+  vic-catparser.py input.json 2 -f json -o Category2.json # Save Category 2 items as JSON to a file
+  vic-catparser.py input.json 1 --hash sha1               # Output only SHA1 hashes
+  vic-catparser.py input.json 1 -f json                   # Output full JSON to stdout
 ```
 
 The CLI can also be launched via the package module, or from the built Windows executable:
@@ -71,12 +71,12 @@ VIC-CatParser.exe input.json 1 -o Category1.json
 
 The script supports three output formats:
 
-1. **json** (default): Outputs the full JSON data in Project VIC format, including @odata.context
-2. **readable**: Human-readable format showing all fields with clear labels
-3. **hashonly**: Outputs only the specified hash type (MD5, SHA1, or PhotoDNA), one per line. Use the `--hash` option to specify which hash type you want:
+1. **hashonly** (default): Outputs only the specified hash type (MD5, SHA1, or PhotoDNA), one per line. Use the `--hash` option to specify which hash type you want:
    - `--hash md5` (default): Output MD5 hashes
    - `--hash sha1`: Output SHA1 hashes
    - `--hash photodna`: Output PhotoDNA hashes
+2. **json**: Outputs the full JSON data in Project VIC format, including @odata.context
+3. **readable**: Human-readable format showing all fields with clear labels
 
 
 ## Development
