@@ -148,9 +148,17 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
         self.grid_rowconfigure(4, weight=0, minsize=20)
         self.progress_bar.set(0)
 
-        self.status_label = ctk.CTkLabel(self, text="Ready", anchor="w")
-        self.status_label.grid(row=5, column=0, padx=16, pady=(0, 4), sticky="ew")
-        self.grid_rowconfigure(5, weight=0, minsize=24)
+        # Read-only textboxes so result/status text can be selected and copied.
+        self.status_text = ctk.CTkTextbox(
+            self,
+            height=44,
+            activate_scrollbars=False,
+            wrap="word",
+        )
+        self.status_text.grid(row=5, column=0, padx=16, pady=(0, 4), sticky="ew")
+        self.grid_rowconfigure(5, weight=0, minsize=44)
+        self._bind_readonly_textbox(self.status_text)
+        self._set_status_text("Ready")
 
         results_frame = ctk.CTkFrame(self)
         results_frame.grid(row=6, column=0, padx=16, pady=(4, 16), sticky="nsew")
@@ -158,8 +166,15 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
         results_frame.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(6, weight=1)
 
-        self.summary_label = ctk.CTkLabel(results_frame, text="Matches (preview):", anchor="w")
-        self.summary_label.grid(row=0, column=0, padx=12, pady=(12, 4), sticky="w")
+        self.summary_text = ctk.CTkTextbox(
+            results_frame,
+            height=28,
+            activate_scrollbars=False,
+            wrap="word",
+        )
+        self.summary_text.grid(row=0, column=0, padx=12, pady=(12, 4), sticky="ew")
+        self._bind_readonly_textbox(self.summary_text)
+        self._set_summary_text("Matches (preview):")
 
         tree_container = ctk.CTkFrame(results_frame)
         tree_container.grid(row=1, column=0, padx=12, pady=(0, 12), sticky="nsew")
@@ -191,6 +206,45 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def _on_format_change(self, value: str):
         self.hash_menu.configure(state="normal" if value == "hashonly" else "disabled")
+
+    @staticmethod
+    def _bind_readonly_textbox(textbox: ctk.CTkTextbox) -> None:
+        """Allow selection/copy while blocking edits."""
+
+        def _select_all(event):
+            textbox.tag_add("sel", "1.0", "end-1c")
+            return "break"
+
+        def _block_edit(event):
+            # Allow navigation and copy/select-all; block typing, cut, and paste.
+            key = event.keysym.lower()
+            if (event.state & 0x4 or event.state & 0x8) and key in {"c", "a"}:
+                return None
+            if key in {
+                "left", "right", "up", "down", "home", "end", "prior", "next",
+                "shift_l", "shift_r", "control_l", "control_r", "meta_l", "meta_r",
+                "alt_l", "alt_r",
+            }:
+                return None
+            return "break"
+
+        textbox.bind("<Control-a>", _select_all)
+        textbox.bind("<Command-a>", _select_all)
+        textbox.bind("<Key>", _block_edit)
+
+    @staticmethod
+    def _set_readonly_textbox(textbox: ctk.CTkTextbox, text: str) -> None:
+        # Keep state=normal so mouse selection / Ctrl+C remain reliable; edits are
+        # blocked by the Key binding installed in _bind_readonly_textbox.
+        textbox.configure(state="normal")
+        textbox.delete("1.0", "end")
+        textbox.insert("1.0", text)
+
+    def _set_status_text(self, text: str) -> None:
+        self._set_readonly_textbox(self.status_text, text)
+
+    def _set_summary_text(self, text: str) -> None:
+        self._set_readonly_textbox(self.summary_text, text)
 
     def _browse_input(self):
         path = filedialog.askopenfilename(
@@ -252,7 +306,7 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
             self.preview_tree.delete(item)
         self._preview_count = 0
         self._total_matches = 0
-        self.summary_label.configure(text="Matches (preview)")
+        self._set_summary_text("Matches (preview)")
 
     def _start_processing(self):
         input_path = self.input_entry.get().strip()
@@ -285,7 +339,7 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
         self._clear_preview()
         self._last_output_path = None
         self.progress_bar.set(0)
-        self.status_label.configure(text="Starting...")
+        self._set_status_text("Starting...")
         self._set_processing_state(True)
 
         args = {
@@ -352,7 +406,7 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def _cancel_processing(self):
         self._cancel_event.set()
-        self.status_label.configure(text="Cancelling...")
+        self._set_status_text("Cancelling...")
 
     def _poll_queue(self):
         latest_status = None
@@ -378,12 +432,12 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
                 break
 
         if latest_status is not None:
-            self.status_label.configure(text=latest_status)
+            self._set_status_text(latest_status)
         if latest_progress is not None:
             current, total = latest_progress
             if total > 0:
                 self.progress_bar.set(current / total)
-            self.status_label.configure(text=f"Processing item {current}/{total}...")
+            self._set_status_text(f"Processing item {current}/{total}...")
 
         if terminal_event is not None:
             event_type, payload = terminal_event
@@ -399,8 +453,8 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
     def _add_preview_row(self, item: dict):
         self._total_matches += 1
         if self._preview_count >= MAX_PREVIEW_MATCHES:
-            self.summary_label.configure(
-                text=f"Match preview (showing first {MAX_PREVIEW_MATCHES} of {self._total_matches} matches)"
+            self._set_summary_text(
+                f"Match preview (showing first {MAX_PREVIEW_MATCHES} of {self._total_matches} matches)"
             )
             return
 
@@ -416,11 +470,11 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
             ),
         )
         if self._total_matches > MAX_PREVIEW_MATCHES:
-            self.summary_label.configure(
-                text=f"Match preview (showing first {MAX_PREVIEW_MATCHES} of {self._total_matches} matches)"
+            self._set_summary_text(
+                f"Match preview (showing first {MAX_PREVIEW_MATCHES} of {self._total_matches} matches)"
             )
         else:
-            self.summary_label.configure(text=f"Match preview ({self._total_matches} matches)")
+            self._set_summary_text(f"Match preview ({self._total_matches} matches)")
 
     def _on_processing_done(self, result):
         self.progress_bar.set(1)
@@ -429,29 +483,29 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
         summary = f"Found {result.matches_found} matches"
         if result.empty_hash_count > 0:
             summary += f" ({result.empty_hash_count} empty hashes omitted)"
-        self.status_label.configure(text=summary)
+        self._set_status_text(summary)
 
         if result.output_path:
             self._last_output_path = result.output_path
             self.open_folder_button.configure(state="normal")
-            self.status_label.configure(text=f"{summary} — saved to {result.output_path}")
+            self._set_status_text(f"{summary} — saved to {result.output_path}")
 
         if result.matches_found == 0:
-            self.summary_label.configure(text="Match preview (no matches)")
+            self._set_summary_text("Match preview (no matches)")
         elif result.matches_found > MAX_PREVIEW_MATCHES:
-            self.summary_label.configure(
-                text=f"Match preview (showing first {MAX_PREVIEW_MATCHES} of {result.matches_found} matches)"
+            self._set_summary_text(
+                f"Match preview (showing first {MAX_PREVIEW_MATCHES} of {result.matches_found} matches)"
             )
         else:
-            self.summary_label.configure(text=f"Match preview ({result.matches_found} matches)")
+            self._set_summary_text(f"Match preview ({result.matches_found} matches)")
 
     def _on_processing_cancelled(self):
         self._set_processing_state(False)
-        self.status_label.configure(text="Processing cancelled.")
+        self._set_status_text("Processing cancelled.")
 
     def _on_processing_error(self, message: str):
         self._set_processing_state(False)
-        self.status_label.configure(text=f"Error: {message}")
+        self._set_status_text(f"Error: {message}")
         messagebox.showerror("Processing error", message)
 
     def _open_output_folder(self):
