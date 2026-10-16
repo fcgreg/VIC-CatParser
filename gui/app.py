@@ -6,7 +6,7 @@ import sys
 import threading
 import time
 from pathlib import Path
-from tkinter import filedialog, messagebox, ttk
+from tkinter import Menu, filedialog, messagebox, ttk
 
 import customtkinter as ctk
 import ijson
@@ -189,6 +189,7 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
             columns=("media_id", "category", "md5", "sha1"),
             show="headings",
             height=10,
+            selectmode="extended",
         )
         self.preview_tree.heading("media_id", text="MediaID")
         self.preview_tree.heading("category", text="Category")
@@ -203,6 +204,7 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
         self.preview_tree.configure(yscrollcommand=scrollbar.set)
         self.preview_tree.grid(row=0, column=0, sticky="nsew")
         scrollbar.grid(row=0, column=1, sticky="ns")
+        self._bind_preview_tree_clipboard()
 
     def _on_format_change(self, value: str):
         self.hash_menu.configure(state="normal" if value == "hashonly" else "disabled")
@@ -245,6 +247,59 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def _set_summary_text(self, text: str) -> None:
         self._set_readonly_textbox(self.summary_text, text)
+
+    def _bind_preview_tree_clipboard(self) -> None:
+        """Enable copy/paste-oriented selection for Match Preview rows."""
+        tree = self.preview_tree
+        tree.bind("<Control-c>", self._copy_preview_selection)
+        tree.bind("<Command-c>", self._copy_preview_selection)
+        tree.bind("<Control-a>", self._select_all_preview_rows)
+        tree.bind("<Command-a>", self._select_all_preview_rows)
+
+        menu = Menu(tree, tearoff=0)
+        menu.add_command(label="Copy", command=lambda: self._copy_preview_selection())
+        menu.add_command(label="Copy with headers", command=lambda: self._copy_preview_selection(include_headers=True))
+        menu.add_separator()
+        menu.add_command(label="Select all", command=self._select_all_preview_rows)
+
+        def _show_menu(event):
+            row_id = tree.identify_row(event.y)
+            if row_id and row_id not in tree.selection():
+                tree.selection_set(row_id)
+            try:
+                menu.tk_popup(event.x_root, event.y_root)
+            finally:
+                menu.grab_release()
+
+        tree.bind("<Button-3>", _show_menu)
+        # macOS / some Linux setups use Button-2 for context menu.
+        tree.bind("<Button-2>", _show_menu)
+
+    def _select_all_preview_rows(self, _event=None):
+        self.preview_tree.selection_set(self.preview_tree.get_children())
+        return "break"
+
+    def _copy_preview_selection(self, _event=None, *, include_headers: bool = False):
+        text = self._format_preview_selection(include_headers=include_headers)
+        if not text:
+            return "break"
+        self.clipboard_clear()
+        self.clipboard_append(text)
+        self.update_idletasks()
+        return "break"
+
+    def _format_preview_selection(self, *, include_headers: bool = False) -> str:
+        tree = self.preview_tree
+        selected = tree.selection()
+        if not selected:
+            return ""
+        lines: list[str] = []
+        if include_headers:
+            lines.append("\t".join(("MediaID", "Category", "MD5", "SHA1")))
+        for item_id in selected:
+            values = tree.item(item_id, "values")
+            lines.append("\t".join(str(value) for value in values))
+        return "\n".join(lines)
 
     def _browse_input(self):
         path = filedialog.askopenfilename(
