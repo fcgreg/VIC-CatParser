@@ -164,5 +164,5 @@ If you would like to contribute to the project, feel free to create a Pull Reque
 
 ## License ##
 
-This project is freely available for use and modification under the Apache 2.0 license. For further information, see the project COPYRIGHT documentation.
+This project is freely available for use and modification under the MIT License. See [LICENSE](LICENSE) and [COPYRIGHT.md](COPYRIGHT.md) for details.
 
