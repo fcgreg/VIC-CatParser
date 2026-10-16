@@ -30,7 +30,7 @@ def _check_cancelled(cancel_event: Optional[Event]) -> None:
 def process_vic(
     json_file: Path,
     category: int,
-    output_format: str = "json",
+    output_format: str = "hashonly",
     hash_type: str = "md5",
     output_file: Optional[Path] = None,
     *,

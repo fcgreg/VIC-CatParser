@@ -9,31 +9,35 @@ from vic_catparser.formatter import OutputFormatter
 from vic_catparser.service import process_vic
 
 
-def main() -> int:
+def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Project VIC JSON Parser - Process and filter VIC JSON data files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s input.json 1                           # Find Category 1 items, output as JSON
-  %(prog)s input.json 0 -f readable               # Find Category 0 items in readable format
-  %(prog)s input.json 2 -o Category2.json         # Save Category 2 items to a file
-  %(prog)s input.json 1 -f hashonly --hash md5    # Output only MD5 hashes
-  %(prog)s input.json 1 -f hashonly --hash sha1   # Output only SHA1 hashes
+  %(prog)s input.json 1                           # Find Category 1 items, output hashes only (defaults to "hashonly" option, outputs MD5 by default)
+  %(prog)s input.json 0 -f readable               # Find Category 0 items and output in a readable format
+  %(prog)s input.json 2 -f json -o Category2.json # Save Category 2 items to a file in JSON format
+  %(prog)s input.json 1 --hash sha1               # Output only SHA1 hashes (Example here uses Category 1)
+  %(prog)s input.json 1 -f json                   # Output full JSON to stdout (Example here uses Category 1)
         """
     )
     parser.add_argument("json_file", help="Path to the VIC JSON file")
     parser.add_argument("category", type=int, help="Category number to search for")
     parser.add_argument("-o", "--output", metavar="OUTPUTFILE", help="Optional output file for results")
-    parser.add_argument("-f", "--format", choices=['json', 'readable', 'hashonly'], default='json',
+    parser.add_argument("-f", "--format", choices=['readable', 'hashonly', 'json'], default='hashonly',
                         dest='output_format',
-                        help="Output format: 'json', 'readable', or 'hashonly' (default: json). "
-                             "The 'hashonly' format option requires the --hash option to be specified, "
-                             "and outputs the chosen hashes one per line.")
+                        help="Output format: 'readable', 'hashonly', or 'json' (default: hashonly). "
+                             "The 'hashonly' format outputs the chosen hashes one per line "
+                             "(see --hash).")
     parser.add_argument("--hash", choices=['md5', 'sha1', 'photodna'], default='md5',
                         help="Hash type to output when using the 'hashonly' format option (default: md5). "
                              "Otherwise this option is ignored")
+    return parser
 
+
+def main() -> int:
+    parser = build_arg_parser()
     args = parser.parse_args()
     formatter = OutputFormatter()
     output_file = Path(args.output) if args.output else None

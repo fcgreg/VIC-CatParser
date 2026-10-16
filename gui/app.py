@@ -87,7 +87,7 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
         self.category_menu.grid(row=1, column=0, padx=12, pady=(0, 12), sticky="w")
 
         ctk.CTkLabel(options_frame, text="Output format").grid(row=0, column=1, padx=12, pady=(12, 4), sticky="w")
-        self.format_var = ctk.StringVar(value="json")
+        self.format_var = ctk.StringVar(value="hashonly")
         self.format_menu = ctk.CTkOptionMenu(
             options_frame,
             variable=self.format_var,
@@ -102,7 +102,7 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
             options_frame,
             variable=self.hash_var,
             values=["md5", "sha1", "photodna"],
-            state="disabled",
+            state="normal",
         )
         self.hash_menu.grid(row=1, column=2, padx=12, pady=(0, 12), sticky="w")
 

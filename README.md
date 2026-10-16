@@ -4,13 +4,13 @@ Category Parser for Project VIC files
 
 ## Background ##
 
-The standard distribution file from Project VIC contains items from every Category interspersed together in the same file. While this is convenient for most forensic analysis tools, it is sometimes useful to isolate items from a specific Category into their own file. For example, during a triage operation in the field, you might only be interested in matching against Category 1 items, and scanning others would be a waste of time.
+The standard distribution file from Project VIC contains items from every Category interspersed together in the same file. While this is convenient for most forensic analysis tools, it is sometimes useful to extract items from a specific Category into their own file. For example, during a triage operation in the field, you might only be interested in matching against Category 1 items, and scanning others would be a waste of time.
 
-This project allows the easy scanning and extraction of items from a properly formatted Project VIC JSON file. The items are extracted by Category, one at a time. The located items can then be output into their own file, or output to the screen, if desired.
+This project allows the easy scanning and extraction of items from a properly formatted Project VIC JSON file. The items are extracted by Category, *one Category at a time*. The located items can then be output into their own file, or output to the screen, if desired.
 
 ## Requirements ##
 
-**Quick summary *(tl;dr)*:**  Any Project VIC file that is uncompressed may be processed by these tools. If you are using Windows, there are pre-built executables for you--no installation is required. If you are using another operating system (based on Linux, macOS, etc.), a standard install/environment for Python 3 is necessary, along with the required packages listed in the project.
+**Quick summary *(tl;dr)*:**  Any Project VIC file that is uncompressed can be processed by these tools. If you are using Windows, there are pre-built executables for you--no installation is required. If you are using another operating system (based on Linux, macOS, etc.), a standard install/environment for Python 3 is necessary, along with the required packages listed in the project.
 
 Special Notes:
 
@@ -19,9 +19,9 @@ Special Notes:
 
 ## Installation ##
 
-The script(s) in this project are standalone and do not require any special installation beyond the above Requirements. Ensure that all files are unzipped together into the same folder so required libraries can be located.
+Ensure that all files are unzipped together into the same folder so required libraries can be located. For Windows-based systems, nothing else is required.
 
-### Installation requirements for development or running within Python on any system ###
+### Installation requirements for development or running directly within Python on any system ###
 
 * Your system needs a working Python 3 environment installed.
 * Having a working **pip3** installation is strongly recommended, and is required for automatic processing of the *requirements.txt* file.
@@ -32,12 +32,12 @@ The script(s) in this project are standalone and do not require any special inst
 
 ## Graphical User Interface ##
 
-This project includes a Windows-friendly GUI built with the CustomTkinter package. The GUI provides the same core functionality as the CLI with a point-and-click interface.
+This project includes a Windows-friendly GUI built with the CustomTkinter package. The GUI provides the same core functionality as the CLI with a point-and-click interface. For this to work, you will need the TKinter packages installed on your system.
 
 ## Command-Line Usage ##
 
 ```
-usage: vic-catparser.py [-h] [-o OUTPUTFILE] [-f {json,readable,hashonly}] [--hash {md5,sha1,photodna}] json_file category
+usage: vic-catparser.py [-h] [-o OUTPUTFILE] [-f {readable,hashonly,json}] [--hash {md5,sha1,photodna}] json_file category
 
 positional arguments:
   json_file             Path to the VIC JSON file
@@ -47,20 +47,20 @@ options:
   -h, --help            show this help message and exit
   -o OUTPUTFILE, --output OUTPUTFILE
                         Optional output file for results
-  -f {json,readable,hashonly}, --format {json,readable,hashonly}
-                        Output format: 'json', 'readable', or 'hashonly' (default: json). The 'hashonly' format option requires the --hash option to be specified, and outputs the chosen hashes one per line.
+  -f {readable,hashonly,json}, --format {readable,hashonly,json}
+                        Output format: 'readable', 'hashonly', or 'json' (default: hashonly). The 'hashonly' format outputs the chosen hashes one per line (see --hash).
   --hash {md5,sha1,photodna}
                         Hash type to output when using the 'hashonly' format option (default: md5). Otherwise this option is ignored
 
 Examples:
-  vic-catparser.py input.json 1                           # Find Category 1 items, output as JSON
-  vic-catparser.py input.json 0 -f readable               # Find Category 0 items in readable format
-  vic-catparser.py input.json 2 -o Category2.json         # Save Category 2 items to a file
-  vic-catparser.py input.json 1 -f hashonly --hash md5    # Output only MD5 hashes
-  vic-catparser.py input.json 1 -f hashonly --hash sha1   # Output only SHA1 hashes
+  vic-catparser.py input.json 1                           # Find Category 1 items, output hashes only (defaults to "hashonly" option, outputs MD5 by default)
+  vic-catparser.py input.json 0 -f readable               # Find Category 0 items and output in a readable format
+  vic-catparser.py input.json 2 -f json -o Category2.json # Save Category 2 items to a file in JSON format
+  vic-catparser.py input.json 1 --hash sha1               # Output only SHA1 hashes (Example here uses Category 1)
+  vic-catparser.py input.json 1 -f json                   # Output full JSON to stdout (Example here uses Category 1)
 ```
 
-The CLI can also be launched via the package module, or from the built Windows executable:
+The CLI can be launched via the package module, or from the built Windows executable:
 
 ```
 python -m vic_catparser.cli input.json 1 -o Category1.json
@@ -71,12 +71,12 @@ VIC-CatParser.exe input.json 1 -o Category1.json
 
 The script supports three output formats:
 
-1. **json** (default): Outputs the full JSON data in Project VIC format, including @odata.context
-2. **readable**: Human-readable format showing all fields with clear labels
-3. **hashonly**: Outputs only the specified hash type (MD5, SHA1, or PhotoDNA), one per line. Use the `--hash` option to specify which hash type you want:
+1. **hashonly** (default): Outputs only the specified hash type (MD5, SHA1, or PhotoDNA), one per line. Use the `--hash` option to specify which hash type you want:
    - `--hash md5` (default): Output MD5 hashes
    - `--hash sha1`: Output SHA1 hashes
    - `--hash photodna`: Output PhotoDNA hashes
+2. **json**: Outputs the full JSON data in Project VIC format, including @odata.context
+3. **readable**: Human-readable format showing all fields with clear labels
 
 
 ## Development
@@ -89,7 +89,7 @@ From the project root folder, after installing the requirements:
 python -m gui.app
 ```
 
-### Standalone Windows Executables ###
+### Building the standalone Windows Executables ###
 
 You can build two standalone Windows executables that run without a Python installation. Both are written to the same folder and share one `_internal/` runtime:
 
@@ -120,7 +120,7 @@ python -m PyInstaller build.spec
 
 3. Close any running copy of VIC-CatParser or VIC-CatParser-GUI before rebuilding, or the build may fail with a permission error.
 
-**Distribution:** Copy the entire `dist/VIC-CatParser/` folder. It includes both executables and a shared `_internal/` subfolder with `python314.dll`, CustomTkinter theme files, and other bundled libraries.
+**Distribution:** Copy the entire `dist/VIC-CatParser/` folder. It includes both executable programs and a shared `_internal/` subfolder with `python314.dll`, CustomTkinter theme files, and other bundled libraries.
 
 **Do not copy only the `.exe` files.** Both programs depend on `_internal/` sitting next to them.
 
@@ -160,7 +160,7 @@ Please use the project Issues List to report any bugs or request enhancements.
 
 ## Contributing
 
-If you would like to contribute to the project, feel free to create a Pull Request and provide the necessary explanations/documentation with your request.  For detailed submissions, please create a corresponding request on the Issues List.
+If you would like to contribute to the project, create a Pull Request and provide the necessary explanations/documentation with your request.  For detailed submissions, please create a corresponding request on the Issues List.
 
 ## License ##
 
