@@ -15,19 +15,19 @@ def build_arg_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s input.json 1                           # Find Category 1 items, output MD5 hashes (default)
-  %(prog)s input.json 0 -f readable               # Find Category 0 items in readable format
-  %(prog)s input.json 2 -f json -o Category2.json # Save Category 2 items as JSON to a file
-  %(prog)s input.json 1 --hash sha1               # Output only SHA1 hashes
-  %(prog)s input.json 1 -f json                   # Output full JSON to stdout
+  %(prog)s input.json 1                           # Find Category 1 items, output hashes only (defaults to "hashonly" option, outputs MD5 by default)
+  %(prog)s input.json 0 -f readable               # Find Category 0 items and output in a readable format
+  %(prog)s input.json 2 -f json -o Category2.json # Save Category 2 items to a file in JSON format
+  %(prog)s input.json 1 --hash sha1               # Output only SHA1 hashes (Example here uses Category 1)
+  %(prog)s input.json 1 -f json                   # Output full JSON to stdout (Example here uses Category 1)
         """
     )
     parser.add_argument("json_file", help="Path to the VIC JSON file")
     parser.add_argument("category", type=int, help="Category number to search for")
     parser.add_argument("-o", "--output", metavar="OUTPUTFILE", help="Optional output file for results")
-    parser.add_argument("-f", "--format", choices=['json', 'readable', 'hashonly'], default='hashonly',
+    parser.add_argument("-f", "--format", choices=['readable', 'hashonly', 'json'], default='hashonly',
                         dest='output_format',
-                        help="Output format: 'json', 'readable', or 'hashonly' (default: hashonly). "
+                        help="Output format: 'readable', 'hashonly', or 'json' (default: hashonly). "
                              "The 'hashonly' format outputs the chosen hashes one per line "
                              "(see --hash).")
     parser.add_argument("--hash", choices=['md5', 'sha1', 'photodna'], default='md5',
