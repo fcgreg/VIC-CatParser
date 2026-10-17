@@ -12,10 +12,10 @@ import customtkinter as ctk
 import ijson
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
-from vic_catparser import __version__
+from vic_catparser import APP_TITLE
 from vic_catparser.service import CancelledError, process_vic
 
-WINDOW_TITLE = f"Project VIC Category Parser v{__version__}"
+WINDOW_TITLE = APP_TITLE
 MAX_PREVIEW_MATCHES = 500
 PROGRESS_UPDATE_INTERVAL_S = 0.1
 QUEUE_EVENTS_PER_TICK = 50
