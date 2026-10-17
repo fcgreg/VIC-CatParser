@@ -12,8 +12,10 @@ import customtkinter as ctk
 import ijson
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
+from vic_catparser import __version__
 from vic_catparser.service import CancelledError, process_vic
 
+WINDOW_TITLE = f"Project VIC Category Parser v{__version__}"
 MAX_PREVIEW_MATCHES = 500
 PROGRESS_UPDATE_INTERVAL_S = 0.1
 QUEUE_EVENTS_PER_TICK = 50
@@ -29,7 +31,7 @@ class VICCatParserApp(ctk.CTk, TkinterDnD.DnDWrapper):
         ctk.set_appearance_mode("system")
         ctk.set_default_color_theme("blue")
 
-        self.title("Project VIC Category Parser Utility")
+        self.title(WINDOW_TITLE)
         self.geometry("800x720")
         self.minsize(800, 600)
 

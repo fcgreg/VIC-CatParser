@@ -11,7 +11,7 @@ from vic_catparser.service import process_vic
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Project VIC JSON Parser - Process and filter VIC JSON data files",
+        description="Project VIC Category Parser - Process and filter VIC JSON data files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
