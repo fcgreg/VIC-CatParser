@@ -5,13 +5,14 @@ from pathlib import Path
 import ijson
 from tqdm import tqdm
 
+from vic_catparser import APP_TITLE
 from vic_catparser.formatter import OutputFormatter
 from vic_catparser.service import process_vic
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Project VIC Category Parser - Process and filter VIC JSON data files",
+        description=f"{APP_TITLE} - Process and filter VIC JSON data files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -21,6 +22,12 @@ Examples:
   %(prog)s input.json 1 --hash sha1               # Output only SHA1 hashes (Example here uses Category 1)
   %(prog)s input.json 1 -f json                   # Output full JSON to stdout (Example here uses Category 1)
         """
+    )
+    parser.add_argument(
+        "-v", "--version",
+        action="version",
+        version=APP_TITLE,
+        help="Print the program name and version, then exit",
     )
     parser.add_argument("json_file", help="Path to the VIC JSON file")
     parser.add_argument("category", type=int, help="Category number to search for")

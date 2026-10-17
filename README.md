@@ -37,7 +37,7 @@ This project includes a Windows-friendly GUI built with the CustomTkinter packag
 ## Command-Line Usage ##
 
 ```
-usage: vic-catparser.py [-h] [-o OUTPUTFILE] [-f {readable,hashonly,json}] [--hash {md5,sha1,photodna}] json_file category
+usage: vic-catparser.py [-h] [-v] [-o OUTPUTFILE] [-f {readable,hashonly,json}] [--hash {md5,sha1,photodna}] json_file category
 
 positional arguments:
   json_file             Path to the VIC JSON file
@@ -45,6 +45,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
+  -v, --version         print the program name and version, then exit
   -o OUTPUTFILE, --output OUTPUTFILE
                         Optional output file for results
   -f {readable,hashonly,json}, --format {readable,hashonly,json}
